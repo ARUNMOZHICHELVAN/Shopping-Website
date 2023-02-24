@@ -31,8 +31,7 @@ io.on('connection', (socket) => {
 })
 
 
-// app.use(passp)
-
+// app.use(passp
 
 app.use(cors({
     origin: 'http://localhost:3000'
@@ -131,19 +130,62 @@ app.post('/verification', async (req, res) => {
     })
 })
 
-//When the user logsout the user's cart_product's field has to be updated in the db
-//So when next time he logsin he can view his lastly added items in cart
-app.post('/updateCart', (req, res) => {
 
-    userDetails.updateOne({ email: req.body.email }, {
-        $set: { Cart_products: req.body.final_cart_product }
-    }).then((res) => {
-        console.log("Successfull updated in mongodb ", res)
-    })
-        .catch(err => {
+app.post('/addOneToCart', async (req, res) => {
+    console.log(req.body)
+
+
+    userDetails.findOne({ email: req.body.email }, async (err, user) => {
+        if (err) {
             console.log(err)
-        })
+            res.json('User not found  1')
+        }
+        else {
+            const cartProducts = user.Cart_products.find(product => product.id === req.body.item_id)
+            console.log("CART PRODUCTS FOUND", cartProducts)
+            if (cartProducts) {
+                const { email, item_id, item_count } = req.body;
+                const a = await userDetails.findOneAndUpdate({ email, "Cart_products.id": item_id }, {
+                    $inc: { 'Cart_products.$.count': item_count }
+                })
+                res.json({ hello: a })
+            }
+            else {
+                user.Cart_products.push({ id: req.body.item_id, count: req.body.item_count })
+                user.save((err, updateUser) => {
+                    if (err) {
+                        console.log(err)
+                        res.json('error in updating the database')
+                    }
+                    else {
+                        console.log("updated User", updateUser)
+                        res.json('Successfully update the database')
+                    }
+                })
+            }
+        }
+    })
+
+
+
 })
+
+app.post('/getCartDB', (req, res) => {
+    userDetails.findOne({ email: req.body.email })
+        .then(user => res.json(user.Cart_products))
+        .catch(err => res.json("unable to find"))
+})
+
+app.post('/deleteFromCart', async (req, res) => {
+    console.log("req.body.item_id ", req.body.item_id)
+    const data = await userDetails.updateOne(
+        { email: req.body.email },
+        { $pull: { Cart_products: { id: req.body.item_id } } }
+    )
+    console.log("data ", data)
+    res.json('sucess ')
+})
+
 
 app.post('/getCart', (req, res) => {
     userDetails.findOne({ email: req.body.email }).then((user) => {
@@ -199,7 +241,6 @@ app.post('/addCartProduct', (req, res) => {
     res.json({
         status: 'ok'
     })
-
 
 
 })
@@ -266,7 +307,7 @@ app.post('/register', async (req, res) => {
 
 
 function validateUser(req, res, next) {
-    // console.log(req.headers.auth)
+    console.log("req.headers", req.headers)
     var token = req.headers.auth
     if (!token) {
         return res.status(401).send({ auth: false, message: "No token" })
@@ -282,6 +323,7 @@ function validateUser(req, res, next) {
         next()
     })
 }
+
 
 
 app.post('/login', async (req, res) => {
@@ -300,7 +342,7 @@ app.post('/login', async (req, res) => {
             expiresIn: "2h",
         }
         )
-        //keepint the generated token in the request header
+        //keeping the generated token in the request header
         //REASON:When a client makes a request to the server, it can include the JWT in the header, 
         //which the server can then use to verify the authenticity of the request and determine the 
         //identity of the client. By setting the JWT in the header, it ensures that the authentication 

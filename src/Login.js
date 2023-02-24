@@ -2,12 +2,16 @@ import React, { useState } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import Navbar from './Navbar'
 import NavbarWelcome from './NavbarWelcome'
+import { ToastContainer, toast } from 'react-toastify';
+// import {usehi}
+import 'react-toastify/dist/ReactToastify.css';
 
 function Login() {
     const [email, setemail] = useState('')
     const [password, setpassword] = useState('')
     const [message, setmessage] = useState('')
     const Navigate = useNavigate()
+    // const history = useHistory()
 
     async function validate(e) {
         e.preventDefault()
@@ -24,13 +28,16 @@ function Login() {
         console.log("response!!! ", data2)
         if (!data2.auth) {
             //If authorization fails coz of incorrect password/invalid email
-            setmessage('Invalid email or Password')
+            toast.error('Invalid Email or Password')
             console.log(data2.msg);
         }
         else {
+            toast.success('Login Successfull')
             window.localStorage.setItem("token", data2.token)
             window.localStorage.setItem("user", email)
+
             Navigate('/Home');
+
         }
         // if (res.data.success) {
         //     console.log("Success")
@@ -41,8 +48,9 @@ function Login() {
     }
 
     return (
-        <div className="relative flex flex-col bg-[#f9fafb] justify-center min-h-screen overflow-hidden">
+        <div className="relative flex flex-col  bg-[#f9fafb] justify-center min-h-screen overflow-hidden">
             <NavbarWelcome />
+            <ToastContainer />
             <div className="w-full p-6 m-auto bg-white rounded-md shadow-md lg:max-w-xl">
                 <h1 className="text-3xl font-semibold text-center text-indigo-500 underline">
                     Log in
@@ -97,6 +105,8 @@ function Login() {
                     </Link >
                 </p>
             </div>
+
+
         </div>
     )
 }

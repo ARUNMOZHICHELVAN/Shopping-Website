@@ -1,23 +1,27 @@
-import React from 'react'
+import React, { lazy, Suspense } from 'react'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
+// const App = React.lazy(() => import('./App'))
 import App from "./App"
 import Cart from "./Cart"
-import { CartContext } from './CartContext'
 import Success from './Success'
 import Failure from './Failure'
-import Orders from "./Order"
+import Orders from './Order'
+import { CartContext } from './CartContext'
 import OrderDetails from './OrderDetails'
 import Login from './Login'
 import Register from './Register'
-import ProtectedRoute from "./ProtectedRoute"
 import Welcome from './Welcome'
 import PasswordChange from './PasswordChange'
+import ProtectedRoute from './ProtectedRoute'
 
 function App2() {
     return (
+
         <CartContext>
             <BrowserRouter>
+
                 <Routes>
+
                     <Route path='/' element={<Welcome />} />
                     <Route path='/login' element={<Login />} />
                     <Route path='/Password-change' element={<PasswordChange />} />
@@ -56,8 +60,10 @@ function App2() {
                     {/* </Route> */}
                     {/* <ProtectedRoute exact path='/home' component={App2} /> */}
                 </Routes>
+                {/* </Suspense> */}
             </BrowserRouter>
         </CartContext>
+
     )
 }
 

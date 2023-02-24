@@ -4,6 +4,8 @@ import { Link } from 'react-router-dom';
 import { useCartContext } from './CartContext';
 // import { update } from 'tar';
 import { productdata } from './data';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 
 function Product(props) {
@@ -20,13 +22,9 @@ function Product(props) {
         }
 
     }
-    function updateCart() {
-        console.log("adsf");
-        alert("Product added successfullly with quantity : " + count)
-        setcount(0)
-    }
     return (
         <div className="w-full bg-white  border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
+            <ToastContainer />
             <a href="#" className=''>
                 <img className="p-8 rounded-t-lg w-[250px] h-[220px] mx-auto hover:scale-125 transition-all duration-500 cursor-pointer" src={props.url} alt="product image" />
             </a>
@@ -45,13 +43,20 @@ function Product(props) {
                 <div className="flex  items-center justify-between">
                     <span className="text-3xl font-bold text-gray-900 dark:text-white">
                         ₹{props.product_price}</span>
-                    <Link
-                        to="/Cart"
-                        onClick={() =>
+                    <button
+                        // to="/Cart"
+                        onClick={() => {
                             x.addOneToCart(props.id, count)
+                            toast.success('Items added to Cart Successfully', {
+                                position: 'top-left',
+                            });
                         }
-                        className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Add to cart
-                    </Link>
+
+                        }
+                        className="text-white  bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none
+                         focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center
+                         dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Add to cart
+                    </button>
 
 
                     <div className="custom-number-input h-10 w-20 text-gray-600 hover:text-gray-700">

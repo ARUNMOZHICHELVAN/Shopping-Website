@@ -1,14 +1,15 @@
-import React from 'react'
+import React, { Suspense } from 'react'
 import { useLocation, useParams } from 'react-router'
 import Navbar from './Navbar'
 import { productdata } from './data';
 import { Link } from 'react-router-dom';
 import jsPDF from 'jspdf';
+const Contact = React.lazy(() => import('./Contact'))
 
 function OrderDetails(props) {
     const location = useLocation();
     const propsData = location.state
-
+    console.log("propsdata.cart_products ", propsData.cart_products)
     let { id } = useParams();
     console.log(id);
     const generatePDF = () => {
@@ -85,6 +86,11 @@ function OrderDetails(props) {
                     </div>
                 </div>
             </div >
+            <Suspense
+                fallback={<div>Loading</div>}
+            >
+                <Contact />
+            </Suspense>
         </div>
     )
 }

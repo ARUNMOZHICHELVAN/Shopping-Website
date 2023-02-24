@@ -1,8 +1,9 @@
-import React from 'react'
+import React, { Suspense } from 'react'
 import { productdata } from './data'
 import Navbar from './Navbar'
 import Product from "./Product"
 import { CartContext } from './CartContext'
+const Contact = React.lazy(() => import('./Contact'))
 function Main() {
   // console.log(User.find())
   return (
@@ -23,6 +24,11 @@ function Main() {
           )
         })}
       </div>
+      <Suspense
+        fallback={<div>Loading</div>}
+      >
+        <Contact />
+      </Suspense>
     </div>
 
   )

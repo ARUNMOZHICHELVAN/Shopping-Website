@@ -2,6 +2,8 @@ import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import Navbar from './Navbar'
 import NavbarWelcome from './NavbarWelcome'
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function Register() {
     const [name, setname] = useState('')
@@ -27,16 +29,18 @@ function Register() {
         if (data2 !== "Email already exist") {
             //1 --> display User registered Successfully message
             //2-->display User already Exist message
-            setregistered(1)
+            // setregistered(1)
+            toast.success('User Registered Successfully')
         }
         else {
-            setregistered(2)
+            toast.success('User already Exist')
         }
     }
 
     return (
         <div>
             <NavbarWelcome />
+            <ToastContainer />
             <div className="flex flex-col items-center min-h-screen pt-6 sm:justify-center sm:pt-0 bg-gray-50">
                 <div>
                 </div>
