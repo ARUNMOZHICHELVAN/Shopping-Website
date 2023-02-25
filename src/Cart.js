@@ -85,9 +85,26 @@ export default function Cart() {
             // console.log("._doc --> ", data._doc)
             if ((data.captured)) {
                 // alert(JSON.stringify(cartProducts.items))
-                console.log("Final CART PRODUCTS", cartProducts.items)
+                console.log("Final CART PRODUCTS", productsincart)
+                // const d = async () => {
+                //     const data = await fetch('http://localhost:5000/addCartProducts', {
+                //         method: 'POST',
+                //         headers: { "Content-type": "application/json" },
+                //         body: JSON.stringify({
+                //             //stringify converts  objects to JSON OBJECT
+                //             order_id: payment_details.order_id,
+                //             cart_products: productsincart
+                //         })
+                //     })
+                //     console.log()
+
+
+                // }
+                // console.log("ARUNMOZHICHELVAN ", productsincart)
+
+                // d()
                 navigate('/Cart/Success', {
-                    state: { ...(data._doc), cart_products: cartProducts.items }
+                    state: { ...(data._doc), cart_products: productsincart }
                 })
             }
             else {
@@ -137,7 +154,7 @@ export default function Cart() {
         catch (err) {
             console.log(err)
         }
-
+        console.log("PRODUCTS IN CART ", productsincart)
         const data = await fetch('http://localhost:5000/razorpay', {
             method: 'POST',
             headers: { "Content-type": "application/json; charset=UTF-8" },

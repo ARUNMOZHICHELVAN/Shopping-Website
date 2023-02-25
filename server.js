@@ -130,6 +130,20 @@ app.post('/verification', async (req, res) => {
     })
 })
 
+//while dumping data, into the database cartproducts will be empty so update it we /useaddCartProducts
+// app.post('/addCartProducts', (req, res) => {
+//     orderDetails.findOneAndUpdate({ order_id: req.body.order_id }, { cart_products: req.body.cart_products }, { new: true }, (err, doc) => {
+//         if (err) {
+//             console.log(err)
+//         }
+//         else {
+//             console.log("doc", doc)
+//             res.json(doc)
+//         }
+//     })
+//     res.json("success")
+// })
+
 
 app.post('/addOneToCart', async (req, res) => {
     console.log(req.body)
@@ -241,7 +255,6 @@ app.post('/addCartProduct', (req, res) => {
     res.json({
         status: 'ok'
     })
-
 
 })
 

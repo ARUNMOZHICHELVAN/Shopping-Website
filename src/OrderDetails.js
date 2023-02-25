@@ -9,7 +9,7 @@ const Contact = React.lazy(() => import('./Contact'))
 function OrderDetails(props) {
     const location = useLocation();
     const propsData = location.state
-    console.log("propsdata.cart_products ", propsData.cart_products)
+    console.log("propsdata.cart_products ", propsData)
     let { id } = useParams();
     console.log(id);
     const generatePDF = () => {
@@ -49,8 +49,8 @@ function OrderDetails(props) {
                                                 return product.id === p.id;
                                             }).product_name}
                                         </div>
-                                        <div className='w-full '>Quantity : {product.quantity}</div>
-                                        <div className='w-full '>Amount : {product.quantity * (productdata.find((p) => {
+                                        <div className='w-full '>Quantity : {product.count}</div>
+                                        <div className='w-full '>Amount : {product.count * (productdata.find((p) => {
                                             return product.id === p.id;
                                         }).product_price)}</div>
                                     </div>
