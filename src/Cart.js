@@ -1,5 +1,5 @@
 import React, { Suspense, useEffect, useState } from 'react'
-import { Link, redirect } from 'react-router-dom'
+import { Link, Navigate, redirect } from 'react-router-dom'
 // import { resolve } from 'styled-jsx/css'
 import { useCartContext } from './CartContext'
 import CartProductCards from './CartProductCards'
@@ -7,8 +7,11 @@ import { getProductData, productdata } from './data'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Product from './Product'
+import getDistance from 'geolib/es/getDistance';
+
 import io from "socket.io-client"
 import { useNavigate } from 'react-router-dom'
+import { useGeolocated } from "react-geolocated";
 import Navbar from './Navbar'
 import { ErrorBoundary } from 'react-error-boundary'
 import ErrorFallback from './Errorboundary'
@@ -26,6 +29,10 @@ socket.on('connect', () => {
 })
 export default function Cart() {
     const [productsincart, setproducts] = useState([])
+    const [notAvailablemodal, setnotAvailablemodal] = useState(false)
+    const [city, setCity] = useState(null);
+    const [notAvailable, setnotAvailable] = useState([])
+
     const [x, setx] = useState(0)
     const cartProducts = useCartContext()
     useEffect(() => {
@@ -61,14 +68,27 @@ export default function Cart() {
                 item_count: quantity
             })
         })
+        const newavailble = (notAvailable.filter((product) => {
+            return product.id !== id
+        }))
+
+        //this if condition is for:
+        //if we remove item simply from our cart then also it displays the toast message so 
+        //prevent it I am checking this
+        if (newavailble.length === 0 && !document.querySelector('.notAvailablenotAvailablemodal').classList.contains('hidden')) {
+            toast.success('Cool😀 You removed all the items that are not in Your location Now try changing the location to get ur products delivered')
+            document.querySelector('.notAvailablemodal').classList.add('hidden')
+            setnotAvailable(newavailble)
+        }
+        else {
+            setnotAvailable(newavailble)
+        }
+
         //We get the setproducts (a state setter) coz whenever we remove an item from the cart 
         //we should update the state so that the page re-renders and produces the updated result fromm the db
         setx(!x)
         console.log("added to db ", JSON.stringify(addtoDB))
-        // setCartProducts(cartProduct.filter((product) => {
-        //     //true means include
-        //     return product.id !== id;
-        // }))
+
     }
 
     console.log("productsincart", productsincart)
@@ -86,23 +106,6 @@ export default function Cart() {
             if ((data.captured)) {
                 // alert(JSON.stringify(cartProducts.items))
                 console.log("Final CART PRODUCTS", productsincart)
-                // const d = async () => {
-                //     const data = await fetch('http://localhost:5000/addCartProducts', {
-                //         method: 'POST',
-                //         headers: { "Content-type": "application/json" },
-                //         body: JSON.stringify({
-                //             //stringify converts  objects to JSON OBJECT
-                //             order_id: payment_details.order_id,
-                //             cart_products: productsincart
-                //         })
-                //     })
-                //     console.log()
-
-
-                // }
-                // console.log("ARUNMOZHICHELVAN ", productsincart)
-
-                // d()
                 navigate('/Cart/Success', {
                     state: { ...(data._doc), cart_products: productsincart }
                 })
@@ -135,80 +138,188 @@ export default function Cart() {
         })
     }
 
+    async function getLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                async (position) => {
+                    // alert("latitude " + position.coords.latitude)
+                    console.log("longitude " + position.coords.longitude)
+                    const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?${position.coords.latitude}=37.42159&${position.coords.longitude}=-122.0837&localityLanguage=en`)
+                    const data = await res.json()
+                    console.log(data)
+                    let dupnotAvailable = []
+                    productsincart.forEach(element => {
+                        const citiesAvailable1 = productdata.find((product) => {
+                            return element.id === product.id
+                        }).city
+                        const citiesAvailable2 = citiesAvailable1.includes(data.localityInfo.administrative[2].name.toLocaleLowerCase().split(' ')[0])
+                        console.log("cities Availalbe1 ", citiesAvailable1)
+                        console.log("citites available 2", citiesAvailable2)
+                        if (!citiesAvailable2) {
+                            console.log("state is set ")
+                            setnotAvailable((prev) => {
+                                return [...prev, { id: element.id, citiesAvailable1: citiesAvailable1 }]
+                            })
+                            // dupnotAvailable = [...dupnotAvailable, { id: element.id, citiesAvailable1: citiesAvailable1 }]
+                            console.log("dup not availbale ", notAvailable)
+                        }
+                    });
+                    console.log("Finally ", notAvailable)
+
+                    //if any of the  product is not available in the user's location then the notAvailablemodal should display 
+                    //telling the user that the particular product is not availbale in his locality 
+                    // if (notAvailable.length > 0) {
+                    //     console.log("model true")
+                    //     setnotAvailable(prev => dupnotAvailable)
+                    //     alert(JSON.stringify(notAvailable))
+                    //     console.log("NOTAVAILBALE ", notAvailable)
+
+                    // }
+                    return
+                },
+                error => {
+                    console.log(error.message)
+                    // setError(error.message);
+                }
+            );
+        }
+    }
+
 
     async function displayRazorpay() {
-
-
-
-        console.log("cartproduct.items " + JSON.stringify(cartProducts.items));
-
-        try {
-            const res = await loadRazorpay();
-            console.log("response12 " + res)
-            if (res) {
-                alert('Razorpay failed to load are u online??');
-                return
+        //if the user's location is not in the range then popup a notAvailablemodal
+        await getLocation()
+        if (notAvailable.length > 0) {
+            document.querySelector('.notAvailablemodal').classList.remove('hidden')
+        }
+        else {
+            try {
+                const res = await loadRazorpay();
+                console.log("response12 " + res)
+                if (res) {
+                    alert('Razorpay failed to load are u online??');
+                    return
+                }
+                console.log("display Razor pay working fine!!");
             }
-            console.log("display Razor pay working fine!!");
-        }
-        catch (err) {
-            console.log(err)
-        }
-        console.log("PRODUCTS IN CART ", productsincart)
-        const data = await fetch('http://localhost:5000/razorpay', {
-            method: 'POST',
-            headers: { "Content-type": "application/json; charset=UTF-8" },
-            body: JSON.stringify({
-                //stringify converts Javascript objects to JSON OBJECT
-                amount_to_be_paid: cartProducts.getTotalCost(productsincart),
-                cart_products: productsincart
+            catch (err) {
+                console.log(err)
+            }
+            console.log("PRODUCTS IN CART ", productsincart)
+            const data = await fetch('http://localhost:5000/razorpay', {
+                method: 'POST',
+                headers: { "Content-type": "application/json; charset=UTF-8" },
+                body: JSON.stringify({
+                    //stringify converts Javascript objects to JSON OBJECT
+                    amount_to_be_paid: cartProducts.getTotalCost(productsincart),
+                    cart_products: productsincart
+                })
             })
-        })
 
-        const data2 = await data.json();
-        console.log("HOW MUCH TO PAY GOT FROM THE SERVER")
-        // window.location.assign('/PaymentStatus')
+            const data2 = await data.json();
+            console.log("HOW MUCH TO PAY GOT FROM THE SERVER")
+            // window.location.assign('/PaymentStatus')
 
-        // console.log("HERE is the data" + data);
-
+            // console.log("HERE is the data" + data);
 
 
-        // catch (err) {
-        //     console.log("Error in fetching data from backend" + err)
-        // }
+
+            // catch (err) {
+            //     console.log("Error in fetching data from backend" + err)
+            // }
 
 
-        var options = {
-            "key": "rzp_test_LbxCLSZLFeb3gR",
-            // "amount": cartProducts.getTotalCost().toString(),
-            "currency": data2.currency.toString(),
-            "order_id": data2.id,
-            "name": "Shopping Website",
-            "description": "Test Transaction",
-            "handler": function (response) {
-                // alert(response.razorpay_payment_id);
-                // alert(response.razorpay_order_id);
-                // alert(response.razorpay_signature)
-            },
-            "prefill": {
-                "email": window.localStorage.getItem("user"),
-                "contact": "9999999999",
-            },
+            var options = {
+                "key": "rzp_test_LbxCLSZLFeb3gR",
+                // "amount": cartProducts.getTotalCost().toString(),
+                "currency": data2.currency.toString(),
+                "order_id": data2.id,
+                "name": "Shopping Website",
+                "description": "Test Transaction",
+                "handler": function (response) {
+                    // alert(response.razorpay_payment_id);
+                    // alert(response.razorpay_order_id);
+                    // alert(response.razorpay_signature)
+                },
+                "prefill": {
+                    "email": window.localStorage.getItem("user"),
+                    "contact": "9999999999",
+                },
 
-        };
-        console.log(options)
+            };
+            console.log(options)
 
-        console.log("PORTAL OPENED");
-        var rzp1 = new window.Razorpay(options)
-        rzp1.open();
+            console.log("PORTAL OPENED");
+            var rzp1 = new window.Razorpay(options)
+            rzp1.open();
 
 
-        console.log("END OF  THE CODE!");
+            console.log("END OF  THE CODE!");
+        }
     }
 
     return (
 
-        <div className='m-0 p-0 bg-gray-100'>
+        <div className='m-0 p-0 bg-gray-100 relative'>
+            <div className='hidden bg-opacity-20 fixed  notAvailablemodal  backdrop-blur-sm  inset-0  flex justify-center items-center'>
+                <div class="relative w-full h-full max-w-2xl  md:h-auto">
+                    {/* <!-- notAvailablemodal content --> */}
+                    <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+                        {/* <!-- notAvailablemodal header --> */}
+                        <div class="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">
+                            <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                                Sorry!! Some of the products in the Cart cannot be delivered to your location
+                            </h3>
+                            <button type="button" onClick={() => document.querySelector('.notAvailablemodal').classList.add('hidden')} class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white" data-notAvailablemodal-hide="defaultnotAvailablemodal">
+                                <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+                                <span class="sr-only">Close notAvailablemodal</span>
+                            </button>
+                        </div>
+
+
+                        {/* <!-- notAvailablemodal body --> */}
+                        <div class="p-6 space-y-6 overflow-y-scroll max-h-80">
+                            {/* <p class="text-base leading-relaxed text-gray-500 dark:text-gray-400">
+                                With less than a month to go before the European Union enacts new consumer privacy laws for its citizens, companies around the world are updating their terms of service agreements to comply.
+                            </p>
+                            <p class="text-base leading-relaxed text-gray-500 dark:text-gray-400">
+                                The European Union’s General Data Protection Regulation (G.D.P.R.) goes into effect on May 25 and is meant to ensure a common set of data rights in the European Union. It requires organizations to notify users as soon as possible of high-risk data breaches that could personally affect them.
+                            </p> */}
+                            <div>
+                                {!notAvailable.length === 0 ? <Skeleton count={10} /> : notAvailable.map((product) => {
+                                    return <div className='p-5  flex flex-col text-base leading-relaxed'>
+                                        <div className='flex'>
+                                            <div className='h-full'>
+                                                <img src={productdata.find((p) => {
+                                                    return product.id === p.id;
+                                                }).url} alt="unable to load" className='h-full w-[80px] float-left' />
+                                            </div>
+                                            <div className='flex-col flex text-left text-gray-700 text-lg font-semibold ml-5'>
+                                                <div className='text-left'>
+                                                    {productdata.find((p) => {
+                                                        return product.id === p.id;
+                                                    }).product_name}
+                                                </div>
+                                                <div className='w-full flex-col'>Cities we deliver : {(product.citiesAvailable1.join(', '))}</div>
+                                            </div>
+                                            <div className='ml-auto' onClick={() => {
+                                                RemoveItem(product.id)
+                                            }} >
+                                                <svg xmlns="http://www.w3.org/2000/svg" className='h-6 w-6 ' fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                                                </svg>
+                                            </div>
+                                        </div>
+                                    </div>
+                                })}
+                            </div>
+
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
             <ToastContainer />
 
             <Navbar />
@@ -221,7 +332,7 @@ export default function Cart() {
                 <div className="flex flex-col  p-6 space-y-4 sm:p-10 dark:bg-gray-900 dark:text-gray-100">
                     <h2 className="text-xl font-semibold">Your cart</h2>
                     <ul className="flex flex-col divide-y divide-gray-700">
-                        {!productsincart.length ? <Skeleton count={10} /> : productsincart.map((product) => {
+                        {!productsincart.length ? <p></p> : productsincart.map((product) => {
                             return <div className='p-5  flex flex-col'>
                                 <div className='flex'>
                                     <div className='h-full'>
@@ -291,6 +402,7 @@ export default function Cart() {
                     </div>
                 </div>
             </div >
+
             {/* <div className='w-full h-full'> */}
             {/* <ErrorBoundary */}
             {/* FallbackComponent={ErrorFallback}
