@@ -1,8 +1,6 @@
-// import { PRERENDER_MANIFEST } from "next/dist/shared/lib/constants";
 import { createContext, useContext, useEffect, useState } from "react";
-import { productdata } from "./data";
-// import cart from "./Cart";
-// import Product from "./Product";
+import productdata from "./data.json";
+
 
 export const cartContext = createContext(null);
 
@@ -10,28 +8,9 @@ export const useCartContext = () => useContext(cartContext);
 
 function CartContext({ children }) {
     const [cartProduct, setCartProducts] = useState([]);
-    // const fetchdata = async () => {
-    //     const data = await fetch('http://localhost:5000/getCart', {
-    //         method: 'POST',
-    //         headers: { "Content-type": "application/json; charset=UTF-8" },
-    //         body: JSON.stringify({
-    //             email: window.localStorage.getItem("user")
-    //         })
-    //     })
-    //     const data2 = await data.json()
-    //     setCartProducts(data2)
-    // }
-    // useEffect(() => {
-    //     fetchdata();
-    // }, [])
-
-
-    // console.log("Restored Cart Products : ", data2)
-    // setCartProducts(data2)
 
     //The cart products shoudl not be empty it should be set to the cartProducts field of the loggged in user
     //For that first fetch the cartproducts from the database
-
 
 
     console.log("CART PRODUCTS  " + cartProduct)
@@ -86,7 +65,6 @@ function CartContext({ children }) {
                 })
             )
         }
-        console.log("cart " + CartContext)
         cartProduct.map((product) => {
             console.log("cart PROODUCT :" + product.id)
             return product

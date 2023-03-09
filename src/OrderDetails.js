@@ -1,7 +1,7 @@
 import React, { Suspense } from 'react'
 import { useLocation, useParams } from 'react-router'
 import Navbar from './Navbar'
-import { productdata } from './data';
+import productdata from './data.json';
 import { Link } from 'react-router-dom';
 import jsPDF from 'jspdf';
 const Contact = React.lazy(() => import('./Contact'))

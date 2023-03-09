@@ -6,13 +6,18 @@ const ngrok = require('ngrok')
 const mongoose = require('mongoose')
 const bodyparser = require('body-parser')
 const fs = require('fs')
+const filePath = './src/data.json';
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const jwt_decode = require('jwt-decode');
 const session = require('express-session')
 const userDetails = require('./dbformat')
 const orderDetails = require('./Ordersformat')
+
+
+
 require("dotenv").config();
+
 
 
 const app = express()
@@ -118,6 +123,7 @@ app.post('/verification', async (req, res) => {
         console.log(webhookData)
         const data_to_sent = { ...webhookData, captured: req.body.event === "payment.captured" ? true : false }
         console.log("data_to_be_sent", data_to_sent)
+
         io.emit('payment-details', JSON.stringify(data_to_sent))
 
     } else {
@@ -250,7 +256,26 @@ app.post('/addCartProduct', (req, res) => {
         .exec()
         .then(payment => console.log(payment))
         .catch(error => console.error(error));
+    //Also update the quantity section of the json data so that the other user gets the live quantity details of the page
+    const fileData = fs.readFileSync(filePath, 'utf8');
+    const jsonData = JSON.parse(fileData);
 
+    toUpdate.forEach(element => {
+        jsonData.forEach((p) => {
+            if (p.id === element.id) {
+                console.log("available quantity ", p.quantity)
+                console.log("element.count ", element.count)
+                if (p.quantity > 0 && element.count > 0 && p.quantity - element.count >= 0) {
+                    p.quantity = (p.quantity) - (element.count)
+                }
+            }
+        })
+    });
+    const updatedJsonData = JSON.stringify(jsonData);
+    console.log("Updated JSON DATA ", updatedJsonData)
+    fs.writeFileSync(filePath, updatedJsonData, () => {
+        console.log("updated successfully")
+    });
     console.log(orderDetails)
     res.json({
         status: 'ok'

@@ -1,5 +1,6 @@
 import React, { lazy, Suspense } from 'react'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { ToastContainer } from "react-toastify"
 // const App = React.lazy(() => import('./App'))
 import App from "./App"
 import Cart from "./Cart"
@@ -18,6 +19,7 @@ function App2() {
     return (
 
         <CartContext>
+            <ToastContainer />
             <BrowserRouter>
 
                 <Routes>
@@ -62,6 +64,7 @@ function App2() {
                 </Routes>
                 {/* </Suspense> */}
             </BrowserRouter>
+            {/* </ToastContainer> */}
         </CartContext>
 
     )

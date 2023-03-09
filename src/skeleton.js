@@ -1,5 +1,5 @@
 import React from 'react'
-import productdata from "./data"
+import productdata from "./data.json"
 
 function skeleton({ }) {
     async function RemoveItem(id) {

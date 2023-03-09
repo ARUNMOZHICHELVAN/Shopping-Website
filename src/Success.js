@@ -15,7 +15,7 @@ export default function Success() {
     const cartProducts = useCartContext()
     // const payment_details = route.
 
-    const [data, setdata] = useState({});
+    const [data, setData] = useState({});
 
     const location = useLocation();
 
@@ -42,7 +42,7 @@ export default function Success() {
         // payment.updateOne({ order_id: location.state.payment_details.order_id }, { $set: { cart_products: location.state.cart_products } })
         // db.users.updateOne({order_id:'"order_LCRU2Z6r9og36V"'},{$set : {cart_products : [{name:"arun"},{name:"uio"}]}})
 
-        setdata(location.state)
+        setData(location.state)
 
     }, [])
 

@@ -1,29 +1,98 @@
 
 import React, { useState } from 'react'
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useCartContext } from './CartContext';
 // import { update } from 'tar';
-import { productdata } from './data';
+import productdata from './data.json';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { hover } from '@testing-library/user-event/dist/hover';
 import { Cursor } from 'mongoose';
+import { useEffect } from 'react';
 
 
 function Product(props) {
     const x = useCartContext();
-    const [count, setcount] = useState(1);
-    const [pincode, setpincode] = useState()
+    const [count, setCount] = useState(1)
+    const [pincode, setPincode] = useState(0)
+    //productAvailable --> for allowing the user to add items to cart only if the product is availbale in his/her location
     const [productAvailable, setProductAvailable] = useState(0)
+    //state which manages the props quantity that is being recieved
+    //Let us say there are 10 items in stock if the user puts all the 10 items in the cart then 
+    //for that particular  user the home page should display that the product is out of stock
+    const [quantity, setQuantity] = useState(props.quantity)
+    // console.log("location--> " + props.userLocation)
+    const [availableStatus, notAavailableStatus] = useState(false)
+    const [availableInLocation, setAvailalbeInLocation] = useState(false)
+    useEffect(() => {
+        if (quantity === 0 || props.userLocation === 'denied') {
+            return;
+        }
+        const x = productdata.find((p) => p.id === props.id).city
+        console.log("location--> " + props.userLocation)
+        for (let index = 0; index < x.length; index++) {
+            console.log(x[index])
+            if (props.userLocation.includes(x[index])) {
+                setAvailalbeInLocation(false)
+                return;
+            }
+
+        }
+        setAvailalbeInLocation(true)
+    }, [])
+
+    useEffect(() => {
+
+    })
+
+    async function fetchcartQuantityDB() {
+        const data = await fetch('http://localhost:5000/getCartDB', {
+            method: 'POST',
+            headers: {
+                "Content-type": "application/json; charset=UTF-8",
+                auth: window.localStorage.getItem("token")
+            },
+            body: JSON.stringify({
+                email: window.localStorage.getItem("user"),
+            })
+        })
+        const res = await data.json()
+
+        const find = res.find((p) => p.id === props.id)
+        if (find !== undefined && props.quantity != 0) {
+            //If the product exiset in the cart then only set the state
+            setQuantity(props.quantity - find.count)
+        }
+
+    }
+    fetchcartQuantityDB()
+
+
+
+
+
+
+    useEffect(() => {
+        console.log("After updating we get ", quantity)
+        if (count > quantity && quantity >= 0) {
+            setCount(quantity)
+        }
+
+    }, [quantity])
+
 
 
     function inc() {
-        setcount(count + 1)
+        console.log("incrment triggered -->!")
+        if (count + 1 <= quantity && count + 1 >= 0) {
+            console.log("quantity --> ", quantity)
+            setCount(count + 1)
+        }
     }
 
     function dec() {
         if (count > 1) {
-            setcount(count - 1)
+            setCount(count - 1)
         }
 
     }
@@ -98,10 +167,11 @@ function Product(props) {
                                     <img
                                         className="p-8 rounded-t-lg w-[250px] h-[220px] mx-auto " src={props.url} alt="product image" />
                                 </a>
-                                <div class="flex px-5 mb-5">
+                                <div class={`${quantity !== 0 ? "hidden" : ""} text- ml-5 p-2   text-red-500 text-2xl currently-unavailable${props.id}`}>Currently Unavailable</div>
+                                <div class={`flex px-5 mb-5 ${quantity === 0 ? "hidden" : ""} `}>
                                     <div class="font-bold text-2xl mr-5">Enter pincode</div>
                                     <div>    <input type="text" id="pincode"
-                                        onChange={(e) => setpincode(parseInt(e.target.value))}
+                                        onChange={(e) => setPincode(parseInt(e.target.value))}
                                         class="block mr-5 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 sm:text-md focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
                                     </div>
                                     <div onClick={() => checkAvailability()}>
@@ -130,9 +200,12 @@ function Product(props) {
                                             ₹{props.product_price}</span>
                                         <button
                                             // to="/Cart"
-                                            onClick={() => {
-                                                if (productAvailable === 1) {
-                                                    x.addOneToCart(props.id, count)
+                                            onClick={async () => {
+                                                if (productAvailable === 1 && count <= quantity && count != 0) {
+                                                    await x.addOneToCart(props.id, count)
+                                                    console.log("quantity ", quantity)
+                                                    console.log("count ", count)
+                                                    setQuantity(quantity - count)
                                                     toast.success('Items added to Cart Successfully', {
                                                         position: 'top-left',
                                                     });
@@ -141,7 +214,7 @@ function Product(props) {
 
                                             }
 
-                                            className={` text-white   bg-blue-700 ${productAvailable !== 1 ? "cursor-not-allowed" : ""} hover:${productAvailable !== 1 ? "bg-blue-800" : ""}
+                                            className={` text-white   bg-blue-700 ${quantity === 0 ? "cursor-not-allowed" : ""} ${productAvailable !== 1 ? "cursor-not-allowed" : ""} hover:${productAvailable !== 1 ? "bg-blue-800" : ""}
                                              focus:${productAvailable !== 1 ? "ring-4" : ""} focus:outline-none
                     focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center
                     dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800`}>
@@ -183,6 +256,9 @@ function Product(props) {
                 <a>
                     <h5 className="text-xl font-semibold tracking-tight text-gray-900 dark:text-white">{props.product_name}</h5>
                 </a>
+                <div class={`${quantity !== 0 ? "hidden" : ""} text-bold  text-red-500 text-2xl currently-unavailable${props.id}`}>Currently Unavailable</div>
+                {availableInLocation && <div class={`text-bold  text-red-500 text-2xl currently-unavailable${props.id}`}>Not available in ur location</div>}
+
                 <div className="flex items-center mt-2.5 mb-5">
                     <svg aria-hidden="true" className="w-5 h-5 text-yellow-300" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><title>First star</title><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
                     <svg aria-hidden="true" className="w-5 h-5 text-yellow-300" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><title>Second star</title><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
