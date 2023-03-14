@@ -11,6 +11,8 @@ socket.on('connect', () => {
     console.log("Success page connection to socket " + socket.id)
 })
 
+
+
 export default function Success() {
     const cartProducts = useCartContext()
     // const payment_details = route.
@@ -25,6 +27,7 @@ export default function Success() {
         console.log("order id in success page ", location.state.order_id)
         console.log("cart products in sucess page", location.state.cart_products)
 
+        //Remember while adding product to cart we should also reduce the quantity section of the whole JSON file
 
         fetch('http://localhost:5000/addCartProduct', {
             method: 'POST',
@@ -32,7 +35,7 @@ export default function Success() {
             body: JSON.stringify({
                 email: window.localStorage.getItem("user"),
                 order_id: location.state.order_id,
-                cart_products: location.state.cart_products
+                // cart_products: location.state.cart_products
             })
         }).then(res => console.log("result of fetch from succes.js --> server  ", res))
             .catch(err => console.log(err))

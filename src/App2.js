@@ -21,8 +21,7 @@ function App2() {
         <CartContext>
             <ToastContainer />
             <BrowserRouter>
-
-                <Routes>
+            <Routes>
 
                     <Route path='/' element={<Welcome />} />
                     <Route path='/login' element={<Login />} />

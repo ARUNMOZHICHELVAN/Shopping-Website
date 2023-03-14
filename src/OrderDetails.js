@@ -32,8 +32,8 @@ function OrderDetails(props) {
 
             <div className='flex  justify-center item-center text-center border shadow-lg'>
 
-                <div className="flex flex-col  p-6 space-y-4 sm:p-10 dark:bg-gray-900 dark:text-gray-100">
-                    <h2 className="text-xl font-semibold">Your Order</h2>
+                <div className="flex flex-col  p-6 space-y-4 sm:p-10 dark:bg-white-900 dark:text-gray-100">
+                    <h2 className="font-bold text-3xl text-black">Your Order</h2>
                     <ul className="flex flex-col divide-y divide-gray-700">
                         {propsData.cart_products.map((product) => {
                             return <div className='p-5  flex flex-col'>
@@ -62,21 +62,32 @@ function OrderDetails(props) {
                             </div>
                         })}
                     </ul>
-                    <div className="space-y-1 text-right  text-3xl font-bold">
+                    <div className="space-y-1 text-right  text-black text-2xl font-bold">
                         <p>Total amount:
                             <span>{propsData.amount / 100}</span>
                         </p>
                     </div>
                     <div className="flex justify-center space-x-4">
-                        <Link to="/Orders" className="px-6 py-2 border hover:border-black rounded-md dark:border-violet-400">
+                        <Link to="/Orders" className="text-white  bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none
+                            focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center
+                            dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
                             < span className="sr-only sm:not-sr-only">Go Back</span>
                         </Link>
-                        <button onClick={generatePDF} className="px-6 py-2 border flex gap-5 hover:border-black rounded-md dark:border-violet-400">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                        <button onClick={generatePDF} className="text-white flex
+                         bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none
+                            focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center
+                            dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                            <div className='pr-2'>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 ">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
                             </svg>
-
+                            </div>
+                            <div>
+                                
                             < span className="sr-only  sm:not-sr-only">Download Transaction Details</span>
+                            </div>
+                            
+
                         </button>
                         {/* <button type="button" className="px-6 py-2 border rounded-md dark:bg-violet-400 dark:text-gray-900 dark:border-violet-400">
                             <a onClick={displayRazorpay}>

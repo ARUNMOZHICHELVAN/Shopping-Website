@@ -13,6 +13,7 @@ function Order() {
     useEffect(() => {
         fetch('http://localhost:5000/Orders', {
             method: 'POST',
+            
             headers: {
                 "Content-type": "application/json; charset=UTF-8",
                 auth: window.localStorage.getItem("token")

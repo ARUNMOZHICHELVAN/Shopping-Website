@@ -7,7 +7,7 @@ import 'react-toastify/dist/ReactToastify.css';
 
 function Register() {
     const [name, setname] = useState('')
-    const [email, setemail] = useState('')
+    const [email, setemail] = useState('')    
     const [password, setpassword] = useState('')
     //For displaying messages such as user registered || user already registered
     const [registered, setregistered] = useState(0)

@@ -8,7 +8,7 @@ function PasswordChange() {
     const [cpassword, setcpassword] = useState('') //Confirm password
     const [message, setmessage] = useState('')
 
-    const changePassword = (e) => {
+    const changePassword = (e) => {  
         e.preventDefault();
 
         fetch('http://localhost:5000/Password-change', {

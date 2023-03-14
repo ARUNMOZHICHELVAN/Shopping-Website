@@ -10,7 +10,7 @@ function NavbarWelcome() {
                 <div className="container mx-auto px-6 py-3 md:flex md:justify-between md:items-center">
                     <div className="flex justify-between items-center">
                         <div className='flex'>
-                            <a className="text-gray-800 text-xl ml-4 font-bold md:text-2xl hover:text-gray-700" href="#">AMC</a>
+                            <a className="text-gray-800 text-xl ml-4 font-bold md:text-2xl hover:text-gray-700" >AMC</a>
                         </div>
 
                         {/* <!-- Mobile menu button --> */}
