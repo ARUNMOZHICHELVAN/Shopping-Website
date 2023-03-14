@@ -1,5 +1,4 @@
-import React, { Suspense, useState } from 'react'
-import productdata from './data.json'
+import React, { Suspense, useEffect, useState } from 'react'
 import Navbar from './Navbar'
 import Product from "./Product"
 import { CartContext } from './CartContext'
@@ -8,6 +7,17 @@ import Skeleton from 'react-loading-skeleton'
 const Contact = React.lazy(() => import('./Contact'))
 function Main() {
   const [userLocation, setUserLocation] = useState('')
+
+  //gettin the product data(Whole JSON FILE) from the database
+  const [productData,setproductData]=useState([])
+  useEffect(() => {
+    const d = async () => await fetch('http://localhost:5000/getProductData').then(data => data.json())
+            .then(data1 => {
+                console.log("data 1 --> ",data1)
+                setproductData(data1)
+            })
+        d()
+  },[])
 
 
   navigator.geolocation.getCurrentPosition(
@@ -31,7 +41,7 @@ function Main() {
   );
 
   //This state has the whole json data of all products for updating the values of quantity key in the data
-  const [productDetail, setProductDetail] = useState(productdata)
+  const [productDetail, setProductDetail] = useState(productData)
   return (
 
     <div className='m-0 p-0 bg-gray-100'>
@@ -44,7 +54,7 @@ function Main() {
             {/* <!-- notAvailablemodal header --> */}
             <div class="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">
               <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
-                Check whether the Product is available in Your location
+              Plzz Give the location access to get more personalized feed
               </h3>
               <button type="button" onClick={() => document.querySelector(`.location-access-modal`).classList.add('hidden')} class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white" data-notAvailablemodal-hide="defaultnotAvailablemodal">
                 <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
@@ -54,17 +64,14 @@ function Main() {
 
 
             {/* <!-- notAvailablemodal body --> */}
-            <div class="p-6 space-y-6 ">
-              plzz Give the location access to get more personalized feed
-            </div>
+            
 
           </div>
         </div>
       </div>
-      {/* </div> */}
-      <div className='grid  grid-cols-1 lg:grid-cols-3 sm: gap-6 p-10
-       '>
-        {productdata.map((product) => {
+      {/* </div> j */}
+      <div className='grid  grid-cols-1 lg:grid-cols-3 sm: gap-6 p-10'>
+        {productData.length>0 &&  productData.map((product) => {
           if (userLocation) {
             return (
               <Product
@@ -74,6 +81,7 @@ function Main() {
                 quantity={product.quantity}
                 url={product.url}
                 userLocation={userLocation}
+                city={product.city}
               />
             )
           }
