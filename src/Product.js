@@ -285,7 +285,7 @@ function Product(props) {
 </Trigger>
 
                 <Hover type="hover">
-                  <div className='border border bg-gray-100 flex'>
+                  <div className='border  bg-gray-100 flex'>
                     <div className='pr-2'>
                     <h1 className='font-bold text-xl text-green-500'>Can be Delivered to Your Location</h1>
                     </div>
