@@ -11,7 +11,7 @@ function Order() {
 
 
     useEffect(() => {
-        fetch('http://localhost:5000/Orders', {
+        fetch('https://shopping-website-04lb.onrender.com/Orders', {
             method: 'POST',
             
             headers: {

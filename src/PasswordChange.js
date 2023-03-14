@@ -11,7 +11,7 @@ function PasswordChange() {
     const changePassword = (e) => {  
         e.preventDefault();
 
-        fetch('http://localhost:5000/Password-change', {
+        fetch('https://shopping-website-04lb.onrender.com/Password-change', {
             method: 'POST',
             headers: { "Content-type": "application/json; charset=UTF-8" },
             body: JSON.stringify({

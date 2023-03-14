@@ -27,12 +27,12 @@ const { Server } = require('socket.io')
 const http = require('http');
 const { json } = require('body-parser');
 const process = require('process');
-const PORT = process.env.PORT_NO 
+const PORT = process.env.PORT_NO || 5000
 const server = http.createServer(app)
 
 const io = new Server(server, {
     cors: {
-        origin: 'http://localhost:3000'
+        origin: 'https://shopping-amc.vercel.app'
     }
 })
 io.on('connection', (socket) => {

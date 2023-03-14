@@ -50,7 +50,7 @@ function Product(props) {
    
     useEffect(() => {
         const fetchcartQuantityDB= async() => {
-            const data = await fetch('http://localhost:5000/getCart', {
+            const data = await fetch('https://shopping-website-04lb.onrender.com/getCart', {
             method: 'POST',
             headers: {
                 "Content-type": "application/json; charset=UTF-8",

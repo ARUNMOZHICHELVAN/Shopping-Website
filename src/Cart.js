@@ -20,7 +20,7 @@ const Contact = React.lazy(() => import('./Contact'))
 
 
 
-const socket = io('http://localhost:5000')
+const socket = io('https://shopping-website-04lb.onrender.com')
 socket.on('connect', () => {
     console.log("cart connection" + socket.id)
 
@@ -39,7 +39,7 @@ export default function Cart() {
     //gettin the product data(Whole JSON FILE) from the database
   const [productData,setproductData]=useState([])
   useEffect(() => {
-    const d = async () => await fetch('http://localhost:5000/getProductData').then(data => data.json())
+    const d = async () => await fetch('https://shopping-website-04lb.onrender.com/getProductData').then(data => data.json())
             .then(data1 => {
                 console.log("product data --> ",data1)
                 setproductData(data1)
@@ -49,7 +49,7 @@ export default function Cart() {
   },[])
 
     useEffect(() => {
-        const d = async () => await fetch('http://localhost:5000/getCart', {
+        const d = async () => await fetch('https://shopping-website-04lb.onrender.com/getCart', {
             method: 'POST',
             headers: {
                 "Content-type": "application/json; charset=UTF-8",
@@ -78,7 +78,7 @@ export default function Cart() {
     async function RemoveItem(id) {
         const quantity = cartProducts.getProductQuantity(id);
 
-        const addtoDB = await fetch('http://localhost:5000/deleteFromCart', {
+        const addtoDB = await fetch('https://shopping-website-04lb.onrender.com/deleteFromCart', {
             method: 'POST',
             headers: { "Content-type": "application/json; charset=UTF-8" },
             body: JSON.stringify({
@@ -186,7 +186,7 @@ export default function Cart() {
             console.log(err)
         }
 
-        const data = await fetch('http://localhost:5000/razorpay', {
+        const data = await fetch('https://shopping-website-04lb.onrender.com/razorpay', {
             method: 'POST',
             headers: { "Content-type": "application/json; charset=UTF-8" },
             body: JSON.stringify({
@@ -268,7 +268,7 @@ export default function Cart() {
 
     async function removeAllOutOfStock(){
         notAvailable.forEach(async(element) => {
-            const addtoDB = await fetch('http://localhost:5000/deleteFromCart', {
+            const addtoDB = await fetch('https://shopping-website-04lb.onrender.com/deleteFromCart', {
             method: 'POST',
             headers: { "Content-type": "application/json; charset=UTF-8" },
             body: JSON.stringify({
