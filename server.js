@@ -11,7 +11,7 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const jwt_decode = require('jwt-decode');
 // const productData=require('./src/data.json')
-const session = require('express-session')
+const session = require('cookie-session')
 const userDetails = require('./dbformat')
 var productDetails=require('./src/productDetailsDB')
 const orderDetails = require('./Ordersformat')
@@ -26,7 +26,8 @@ const app = express()
 const { Server } = require('socket.io')
 const http = require('http');
 const { json } = require('body-parser');
-const PORT = 5000
+const process = require('process');
+const PORT = process.env.PORT_NO
 const server = http.createServer(app)
 
 const io = new Server(server, {
@@ -73,7 +74,7 @@ var instance = new RazorPay({
     key_secret: 'W08GhAaJwA4WkLc37LsRFgrh'
 })
 
-server.listen(5000, (req, res) => {
+server.listen(PORT, (req, res) => {
     console.log("Backend");
 })
 
