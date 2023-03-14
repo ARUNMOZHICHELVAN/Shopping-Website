@@ -8,6 +8,9 @@ import 'react-toastify/dist/ReactToastify.css';
 import { hover } from '@testing-library/user-event/dist/hover';
 import { Cursor } from 'mongoose';
 import { useEffect } from 'react';
+import ReactHover from 'react-hover/dist/ReactHover';
+import { Hover } from 'react-hover';
+import Trigger from 'react-hover/dist/lib/Trigger';
 
 
 function Product(props) {
@@ -275,12 +278,25 @@ function Product(props) {
                 {/* <img src='https://cdn.iconscout.com/icon/premium/png-512-thumb/sold-out-876564.png?f=avif&w=256'
                                 className={`${quantity!==0? "hidden" : ""} h-8 w-8 currently-unavailable${props.id}`} /> */}
                 <div class={`${quantity !== 0 ? "hidden" : ""} text-bold  text-red-500 text-2xl currently-unavailable${props.id}`}>Currently Unavailable</div>
-                {availableInLocation && <div className='z-0'> <img src='https://img.icons8.com/dusk/256/checked-truck.png' 
-  className={`h-8 w-8 hover:opacity-100 `} />
-{/* <div className=' top-0 left-full ml-2 hidden opacity-0 delivered hover:opacity-100'>
-  <img src='https://img.icons8.com/emoji/256/check-mark-button-emoji.png' className='opacity-0 hover:opacity-100 h-11 w-11' />
-</div> */}
-</div>}
+                {availableInLocation &&  
+                <ReactHover >
+                <Trigger type="trigger" className="visible">
+  <img src='https://img.icons8.com/dusk/256/checked-truck.png'  className=" h-8 w-8 hover:opacity-100" />
+</Trigger>
+
+                <Hover type="hover">
+                  <div className='border border bg-gray-100 flex'>
+                    <div className='pr-2'>
+                    <h1 className='font-bold text-xl text-green-500'>Can be Delivered to Your Location</h1>
+                    </div>
+                    <div>
+                    <img src='https://img.icons8.com/color/256/checked.png' alt='Unable to Load' className='h-8 w-8'/>
+                        
+                    </div>
+                    </div>
+                </Hover>
+              </ReactHover>
+                }
                 {/* <img src='https://img.icons8.com/dusk/256/checked-truck.png'  className='h-8 w-8'/> */}
                 <div className="flex items-center mt-2.5 mb-5">
                     <svg aria-hidden="true" className="w-5 h-5 text-yellow-300" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><title>First star</title><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>

@@ -10,8 +10,10 @@ const filePath = './src/data.json';
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const jwt_decode = require('jwt-decode');
+// const productData=require('./src/data.json')
 const session = require('express-session')
 const userDetails = require('./dbformat')
+var productDetails=require('./src/productDetailsDB')
 const orderDetails = require('./Ordersformat')
 
 
@@ -23,6 +25,7 @@ require("dotenv").config();
 const app = express()
 const { Server } = require('socket.io')
 const http = require('http');
+const { json } = require('body-parser');
 const PORT = 5000
 const server = http.createServer(app)
 
@@ -136,19 +139,12 @@ app.post('/verification', async (req, res) => {
     })
 })
 
-//while dumping data, into the database cartproducts will be empty so update it we /useaddCartProducts
-// app.post('/addCartProducts', (req, res) => {
-//     orderDetails.findOneAndUpdate({ order_id: req.body.order_id }, { cart_products: req.body.cart_products }, { new: true }, (err, doc) => {
-//         if (err) {
-//             console.log(err)
-//         }
-//         else {
-//             console.log("doc", doc)
-//             res.json(doc)
-//         }
-//     })
-//     res.json("success")
-// })
+app.get('/getProductData',async(req,res) => {
+    const user= await productDetails.find({});
+    console.log(user);
+    res.json(user)
+})
+
 
 
 app.post('/addOneToCart', async (req, res) => {
@@ -190,10 +186,36 @@ app.post('/addOneToCart', async (req, res) => {
 
 })
 
+
+
 app.post('/getCartDB', (req, res) => {
     userDetails.findOne({ email: req.body.email })
-        .then(user => res.json(user.Cart_products))
-        .catch(err => res.json("unable to find"))
+  .then(user => {
+    // after getting the products from the cart check if the count of each of the product
+    // is less than the quantity in the json file coz it might have been updated while
+    // making the payment
+    return user.Cart_products; // Return the cart products array
+  })
+  .then(async(cartProducts) => {
+    const productData= await productDetails.find({});
+    console.log("Hey ARUN --> "+JSON.stringify(cartProducts))
+    var newCartProducts = []
+    cartProducts.forEach(element => {
+        var quantity=productData.find(p => p.id === element.id).quantity
+        console.log("quantity --> ",quantity)
+        console.log("element.count --> ",element.count)
+      if (element.count >quantity) {
+        newCartProducts.push({ "id": element.id, "count": quantity }) // Use element.count instead of quantity
+      } else {
+        if(quantity-element.count!==0){
+        newCartProducts.push({ "id": element.id, "count": element.count })
+
+        }
+      }
+    });
+  })
+  .catch(err => res.json("unable to find"));
+
 })
 
 app.post('/deleteFromCart', async (req, res) => {
@@ -208,13 +230,16 @@ app.post('/deleteFromCart', async (req, res) => {
 
 
 app.post('/getCart', (req, res) => {
+    
     userDetails.findOne({ email: req.body.email }).then((user) => {
-        res.json({ Cart: user.Cart_products })
+        res.json( user.Cart_products)
     })
         .catch((err) => {
             console.log("There is a error in getting the previously Stored Cart Items of the logged in user")
         })
 })
+
+
 
 app.post('/razorpay', async (req, res) => {
     console.log(" cart products ", JSON.stringify(req.body.cart_products))
@@ -240,43 +265,53 @@ app.post('/razorpay', async (req, res) => {
 
 
 
-app.post('/addCartProduct', (req, res) => {
-    console.log("Cart products in server ", req.body)
+app.post('/addCartProduct', async(req, res) => {
+    //Explanation : First whenever a user makes payment Before redirecting to the Success page First an order is created
+    //Then after redirecting to the Success page we just update the cart_products section of the freshly created order
+    //Now as we have made payment and confirmed our order we should reduce the quantity section of the Final JSON file
+    //But I think this logic fails if we need to add cancellig order feature for the placed order
 
-    const toUpdate = req.body.cart_products
-    console.log("toUpdate is ", req.body.cart_products)
+    console.log("Cart products in server ", req.body)
+    //Getting the current cart products of the user directly from the user
+    const {Cart_products} = await userDetails.findOne({email:req.body.email})
+    console.log("toUpdate is ", Cart_products)
 
 
 
     orderDetails.findOneAndUpdate(
         { email: req.body.email },
-        { $set: { cart_products: toUpdate } },
+        { $set: { cart_products: Cart_products } },
         { sort: { time_stamp: -1 }, new: true }
     )
         .exec()
-        .then(payment => console.log(payment))
+        .then(payment => {
+            // console.log(payment)
+        }
+        )
         .catch(error => console.error(error));
-    //Also update the quantity section of the json data so that the other user gets the live quantity details of the page
-    const fileData = fs.readFileSync(filePath, 'utf8');
-    const jsonData = JSON.parse(fileData);
 
-    toUpdate.forEach(element => {
-        jsonData.forEach((p) => {
-            if (p.id === element.id) {
-                console.log("available quantity ", p.quantity)
-                console.log("element.count ", element.count)
-                if (p.quantity > 0 && element.count > 0 && p.quantity - element.count >= 0) {
-                    p.quantity = (p.quantity) - (element.count)
-                }
-            }
-        })
+
+    //Also update the quantity section of the json data so that the other user gets the live quantity details of the page
+    Cart_products.forEach(async(element) => {
+            
+        const updatedProduct = await productDetails.findOneAndUpdate(
+            { id: element.id },
+            { $inc: { quantity: -element.count } },
+            { new: true }
+          );
+          //Also update the cart products i.e if there are 10 products in the cart if an order of 6 is placed then only 
+          //4 should be there in the cart now
+        console.log("product updated successfully ", updatedProduct)
+        if(updatedProduct.quantity<element.count){
+            const updatedCartProduct=await userDetails.findOneAndUpdate({email:req.body.email , "Cart_products.id":element.id},
+        {$set:{"Cart_products.$.count" :updatedProduct.quantity }})
+        console.log("Cart updated Successfully  ",updatedCartProduct)
+        } 
+
+
     });
-    const updatedJsonData = JSON.stringify(jsonData);
-    console.log("Updated JSON DATA ", updatedJsonData)
-    fs.writeFileSync(filePath, updatedJsonData, () => {
-        console.log("updated successfully")
-    });
-    console.log(orderDetails)
+    
+    
     res.json({
         status: 'ok'
     })
@@ -300,7 +335,7 @@ app.post('/Password-change', async (req, res) => {
     console.log(JSON.stringify(req.body))
     const { email, password, cpassword } = req.body
     console.log("email ", email)
-    const x = await userDetails.findOne({ email: email })
+    const x = await     ls.findOne({ email: email })
     if (!x) {
         res.json({ status: "Invalid Email" })
     }
