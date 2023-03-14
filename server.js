@@ -32,7 +32,7 @@ const server = http.createServer(app)
 
 const io = new Server(server, {
     cors: {
-        origin: 'https://shopping-amc.vercel.app'
+        origin: 'http://localhost:3000'
     }
 })
 io.on('connection', (socket) => {
@@ -43,7 +43,7 @@ io.on('connection', (socket) => {
 // app.use(passp
 
 app.use(cors({
-    origin: 'http://localhost:3000'
+    origin: 'https://shopping-amc.vercel.app'
 }));
 
 // MongoDB Connection   
