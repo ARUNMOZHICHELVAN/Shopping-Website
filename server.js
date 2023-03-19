@@ -45,7 +45,7 @@ io.on('connection', (socket) => {
 // app.use(passp
 
 app.use(cors({
-    origin: 'http://localhost:3000'
+    origin: 'https://shopping-amc.vercel.app'
 }));
 
 // MongoDB Connection   
