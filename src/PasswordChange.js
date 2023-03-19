@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { toast } from 'react-toastify'
 import NavbarWelcome from './NavbarWelcome'
 
 function PasswordChange() {
@@ -8,10 +9,10 @@ function PasswordChange() {
     const [cpassword, setcpassword] = useState('') //Confirm password
     const [message, setmessage] = useState('')
 
-    const changePassword = (e) => {  
+    const changePassword = async(e) => {  
         e.preventDefault();
 
-        fetch('https://shopping-website-04lb.onrender.com/Password-change', {
+        const d=await fetch('http://localhost:5000/Password-change', {
             method: 'POST',
             headers: { "Content-type": "application/json; charset=UTF-8" },
             body: JSON.stringify({
@@ -26,14 +27,15 @@ function PasswordChange() {
             .then((res) => {
                 const { status } = res
                 console.log("Stau ", res)
-                if (status === "Invalid Email") { setmessage(status) }
-                if (res.status === "Passwords does not match") { setmessage(status) }
-                if (res.status === "Password Changed Successfully") { setmessage(status) }
+                if (status === "Invalid Email") { toast.error('Invalid Email') }
+                if (res.status === "Passwords does not match") { toast.error('Passwords does not match') }
+                if (res.status === "Password Changed Successfully") { toast.success('Password Changed Successfully') }
                 console.log("Response from server on changing password", res)
             })
             .catch(err => {
                 console.log("Error in changing password ", err)
             })
+        // await d()
 
 
     }

@@ -5,7 +5,7 @@ function skeleton({ }) {
     async function RemoveItem(id) {
         const quantity = cartProducts.getProductQuantity(id);
 
-        const addtoDB = await fetch('https://shopping-website-04lb.onrender.com/deleteFromCart', {
+        const addtoDB = await fetch('http://localhost:5000/deleteFromCart', {
             method: 'POST',
             headers: { "Content-type": "application/json; charset=UTF-8" },
             body: JSON.stringify({

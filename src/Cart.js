@@ -20,7 +20,7 @@ const Contact = React.lazy(() => import('./Contact'))
 
 
 
-const socket = io('https://shopping-website-04lb.onrender.com')
+const socket = io('http://localhost:5000')
 socket.on('connect', () => {
     console.log("cart connection" + socket.id)
 
@@ -35,11 +35,12 @@ export default function Cart() {
     //loaded state is used to check whether the fetch has been taken place or not for getting the
     //whole JSON file
     const [loaded,setLoaded]=useState(false)
+    
 
     //gettin the product data(Whole JSON FILE) from the database
   const [productData,setproductData]=useState([])
   useEffect(() => {
-    const d = async () => await fetch('https://shopping-website-04lb.onrender.com/getProductData').then(data => data.json())
+    const d = async () => await fetch('http://localhost:5000/getProductData').then(data => data.json())
             .then(data1 => {
                 console.log("product data --> ",data1)
                 setproductData(data1)
@@ -48,8 +49,11 @@ export default function Cart() {
         d()
   },[])
 
+  
+
+
     useEffect(() => {
-        const d = async () => await fetch('https://shopping-website-04lb.onrender.com/getCart', {
+        const d = async () => await fetch('http://localhost:5000/getCart', {
             method: 'POST',
             headers: {
                 "Content-type": "application/json; charset=UTF-8",
@@ -69,6 +73,8 @@ export default function Cart() {
         
 
     }, [x,notAvailable])
+
+
     useEffect(() => {
         if(productData.length>0 && productsInCart.length>0 && notAvailable.length===0){
             setLoaded(true)
@@ -78,7 +84,7 @@ export default function Cart() {
     async function RemoveItem(id) {
         const quantity = cartProducts.getProductQuantity(id);
 
-        const addtoDB = await fetch('https://shopping-website-04lb.onrender.com/deleteFromCart', {
+        const addtoDB = await fetch('http://localhost:5000/deleteFromCart', {
             method: 'POST',
             headers: { "Content-type": "application/json; charset=UTF-8" },
             body: JSON.stringify({
@@ -186,7 +192,7 @@ export default function Cart() {
             console.log(err)
         }
 
-        const data = await fetch('https://shopping-website-04lb.onrender.com/razorpay', {
+        const data = await fetch('http://localhost:5000/razorpay', {
             method: 'POST',
             headers: { "Content-type": "application/json; charset=UTF-8" },
             body: JSON.stringify({
@@ -259,16 +265,30 @@ export default function Cart() {
             
 
         }
-        else {
-
-            
-            displayRazorpay()
+        else{
+            const d=async() => {
+                const data = await fetch('http://localhost:5000/addOrders', {
+                method: 'POST',
+                headers: { "Content-type": "application/json; charset=UTF-8" },
+                body: JSON.stringify({
+                //stringify converts Javascript objects to JSON OBJECT
+                    email : window.localStorage.getItem("user"),
+                    cart_products:productsInCart
+            })
+        })
+            }
+            d()
+            navigate('/Cart/SelectAddress')
         }
+        
+            
+            // displayRazorpay()
+        
     }
 
     async function removeAllOutOfStock(){
         notAvailable.forEach(async(element) => {
-            const addtoDB = await fetch('https://shopping-website-04lb.onrender.com/deleteFromCart', {
+            const addtoDB = await fetch('http://localhost:5000/deleteFromCart', {
             method: 'POST',
             headers: { "Content-type": "application/json; charset=UTF-8" },
             body: JSON.stringify({
@@ -290,7 +310,7 @@ export default function Cart() {
 
         <div className='m-0 p-0 bg-gray-100 relative'>
             {/* Some of the  products may be out of stock so tell the user to remove those items */}
-            <div className='hidden           bg-opacity-20 fixed  notAvailablemodal  backdrop-blur-sm  inset-0  flex justify-center items-center'>
+            <div className='hidden bg-opacity-20 fixed  notAvailablemodal  backdrop-blur-sm  inset-0  flex justify-center items-center'>
                 <div class="relative w-full h-full max-w-2xl  md:h-auto">
                     {/* <!-- notAvailablemodal content --> */}
                     <div class=" bg-white rounded-lg shadow dark:bg-gray-700">
@@ -397,7 +417,7 @@ export default function Cart() {
                                         <img src={productData.find((p) => { 
                                             return product.id === p.id;
                                         }).url} alt="unable to load" className='h-full w-[80px] float-left' />
-                                    <div className={`${product.count !== 0 ? "hidden" : ""} absolute  top-0 left-0 bg-gray-500 bg-opacity-50 outOfStock${product.id} text-white`}>Out of Stock</div>
+                                    <div className={`${product.count >= 1 ? "hidden" : ""} absolute  top-0 left-0 bg-gray-500 bg-opacity-50 outOfStock${product.id} text-white`}>Out of Stock</div>
                                         
                                     </div>
                                     {/* OUT OF STOCK */}    
@@ -409,7 +429,7 @@ export default function Cart() {
                                                 return product.id === p.id;
                                             }).product_name}
                                         </div>
-                                        <div className={`${product.count===0 ? "hidden" : ""}`}>
+                                        <div className={`${product.count<=0 ? "hidden" : ""}`}>
                                         <div className='w-full '>Quantity : {product.count}</div>
                                         <div className='w-full '>Price : {product.count} x {productData.find(p => p.id===product.id).product_price} = {product.count * (productData.find((p) => {
                                             return product.id === p.id;

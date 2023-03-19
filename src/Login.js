@@ -15,7 +15,7 @@ function Login() {
 
     async function validate(e) {
         e.preventDefault()
-        const data = await fetch('https://shopping-website-04lb.onrender.com/login', {
+        const data = await fetch('http://localhost:5000/login', {
             method: 'POST',
             headers: { "Content-type": "application/json" },
             body: JSON.stringify({

@@ -11,7 +11,7 @@ function Main() {
   //gettin the product data(Whole JSON FILE) from the database
   const [productData,setproductData]=useState([])
   useEffect(() => {
-    const d = async () => await fetch('https://shopping-website-04lb.onrender.com/getProductData').then(data => data.json())
+    const d = async () => await fetch('http://localhost:5000/getProductData').then(data => data.json())
             .then(data1 => {
                 console.log("data 1 --> ",data1)
                 setproductData(data1)

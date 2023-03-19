@@ -14,6 +14,7 @@ import Register from './Register'
 import Welcome from './Welcome'
 import PasswordChange from './PasswordChange'
 import ProtectedRoute from './ProtectedRoute'
+import SelectAddress from './SelectAddress'
 
 function App2() {
     return (
@@ -46,6 +47,11 @@ function App2() {
                     <Route path='/Cart/Failure' element={
                         <ProtectedRoute>
                             <Failure />
+                        </ProtectedRoute>
+                    } />
+                    <Route path='/Cart/SelectAddress' element={
+                        <ProtectedRoute>
+                            <SelectAddress />
                         </ProtectedRoute>
                     } />
                     <Route path='Orders' element={

@@ -5,7 +5,7 @@ import { useCartContext } from './CartContext'
 import { useEffect } from 'react'
 import { Route, useLocation } from 'react-router'
 
-const socket = io('https://shopping-website-04lb.onrender.com')
+const socket = io('http://localhost:5000')
 
 socket.on('connect', () => {
     console.log("Success page connection to socket " + socket.id)
@@ -29,7 +29,7 @@ export default function Success() {
 
         //Remember while adding product to cart we should also reduce the quantity section of the whole JSON file
 
-        fetch('https://shopping-website-04lb.onrender.com/addCartProduct', {
+        fetch('http://localhost:5000/addCartProduct', {
             method: 'POST',
             headers: { "Content-type": "application/json; charset=UTF-8" },
             body: JSON.stringify({

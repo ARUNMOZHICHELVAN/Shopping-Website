@@ -14,7 +14,7 @@ function Register() {
 
     async function validate(event) {
         event.preventDefault()
-        const data = await fetch('https://shopping-website-04lb.onrender.com/register', {
+        const data = await fetch('http://localhost:5000/register', {
             method: 'POST',
             headers: { "Content-type": "application/json; charset=UTF-8" },
             body: JSON.stringify({

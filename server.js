@@ -18,6 +18,7 @@ const orderDetails = require('./Ordersformat')
 
 
 
+
 require("dotenv").config();
 
 
@@ -27,12 +28,13 @@ const { Server } = require('socket.io')
 const http = require('http');
 const { json } = require('body-parser');
 const process = require('process');
+const { v4: uuidv4 } = require('uuid');
 const PORT = process.env.PORT_NO || 5000
 const server = http.createServer(app)
 
 const io = new Server(server, {
     cors: {
-        origin: 'https://shopping-amc.vercel.app'
+        origin: 'http://localhost:3000'
     }
 })
 io.on('connection', (socket) => {
@@ -336,7 +338,7 @@ app.post('/Password-change', async (req, res) => {
     console.log(JSON.stringify(req.body))
     const { email, password, cpassword } = req.body
     console.log("email ", email)
-    const x = await     ls.findOne({ email: email })
+    const x = await userDetails.findOne({ email: email })
     if (!x) {
         res.json({ status: "Invalid Email" })
     }
@@ -367,7 +369,8 @@ app.post('/register', async (req, res) => {
             name: req.body.email,
             email: req.body.email,
             password: hash,
-            Cart_products: []
+            Cart_products: [],
+            Address:[]
         })
         //sending the saved data 
         res.json(dataInDatabase)
@@ -462,6 +465,16 @@ app.post('/login', async (req, res) => {
 
 })
 
+app.post('/getAddress',async(req,res) => {
+    const data=await userDetails.findOne({email:req.body.email})
+    if(data!==undefined){
+        res.json(data)
+    }
+    // res.json({status:"not able to fetch data"})
+})
+
+
+
 // app.post('/getall', validateUser, async (req, res, next) => {
 //     //Never include passwords in the response
 //     console.log("request comming into get all POST REQUEST", req)
@@ -474,3 +487,43 @@ app.post('/login', async (req, res) => {
 //     res.status(200).send(user)
 // })
 
+app.post('/addAddress',async(req,res) => {
+    const inf=req.body
+    const new_address={"id":uuidv4(),"street":inf.street ,"area":inf.area,"city":inf.city,"phone_no":inf.phone_no}
+
+     userDetails.findOneAndUpdate({email:req.body.email},{$push : {Address:new_address}},{new:true}, (err,user) => {
+        if(err){
+            console.log(err)
+        }
+        else{
+            console.log(user)
+        }
+    })
+    res.json('success')
+})
+
+app.post('/addOrders',(req,res) => {
+    userDetails.findOneAndUpdate({email:req.body.email},{$set:{Order_products:req.body.cart_products}},(err,user) => {
+        if(err){
+            res.json('error')
+        }
+        else{
+            res.json('Updated successfully')
+        }
+    })
+
+})
+
+app.post('/getOrders',(req,res) => {
+    userDetails.findOne({ email: req.body.email }).then((user) => {
+        res.json( user.Order_products)
+    })
+        .catch((err) => {
+            console.log("There is a error in getting the previously Stored Cart Items of the logged in user")
+        })
+    
+})
+//for deleting list of products which are not available to the selected address while making Order
+app.post('/deleteNotAvailable',async(req,res) => {
+    userDetails.findOne({email:req.body.email})
+})

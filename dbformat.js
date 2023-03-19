@@ -21,6 +21,16 @@ const userSchema = new Schema({
     Cart_products: {
         type: Array,
         required: true
+    },
+    Address:{
+        type:Array,
+        required:false
+    },
+    // since if the user wants to remove some products from the current order alone and not from the cart 
+    // then it will be easy if there is a seperate entry
+    Order_products:{
+        type:Array,
+        required:false
     }
 
 })
